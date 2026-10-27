@@ -1,5 +1,8 @@
 package pe.utp.rinconcito.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -10,17 +13,79 @@ import java.math.BigDecimal;
 
 @Controller
 public class CatalogController {
-    private final ProductDao products; private final CatalogService catalog;
-    public CatalogController(ProductDao products,CatalogService catalog){this.products=products;this.catalog=catalog;}
-    @GetMapping("/products") public String list(Model m){m.addAttribute("items",products.all());m.addAttribute("categories",products.categories());return "products";}
-    @PostMapping("/products") public String create(@RequestParam String name,@RequestParam BigDecimal price,@RequestParam long categoryId,@RequestParam(defaultValue="0") long minimum,RedirectAttributes flash){
-        try{long id=catalog.createProduct(name,price,categoryId,minimum);flash.addFlashAttribute("success","Producto registrado #"+id);}catch(IllegalArgumentException | org.springframework.dao.DataIntegrityViolationException e){flash.addFlashAttribute("error",e.getMessage());}
+    private static final Logger LOG = LoggerFactory.getLogger(CatalogController.class);
+    private static final String GENERIC_ERROR = "No se pudo completar la operación. Verifique los datos e intente nuevamente.";
+
+    private final ProductDao products;
+    private final CatalogService catalog;
+
+    public CatalogController(ProductDao products, CatalogService catalog) {
+        this.products = products;
+        this.catalog = catalog;
+    }
+
+    @GetMapping("/products")
+    public String list(Model m) {
+        m.addAttribute("items", products.all());
+        m.addAttribute("categories", products.categories());
+        return "products";
+    }
+
+    @PostMapping("/products")
+    public String create(@RequestParam String name, @RequestParam BigDecimal price, @RequestParam long categoryId,
+                         @RequestParam(defaultValue = "0") long minimum, RedirectAttributes flash) {
+        try {
+            long id = catalog.createProduct(name, price, categoryId, minimum);
+            flash.addFlashAttribute("success", "Producto registrado #" + id);
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            LOG.warn("No se pudo registrar el producto", e);
+            flash.addFlashAttribute("error", GENERIC_ERROR);
+        }
         return "redirect:/products";
     }
-    @PostMapping("/products/{id}/update") public String update(@PathVariable long id,@RequestParam String name,@RequestParam BigDecimal price,RedirectAttributes flash){
-        try{catalog.changeProduct(id,name,price);flash.addFlashAttribute("success","Producto actualizado");}catch(IllegalArgumentException | org.springframework.dao.DataIntegrityViolationException e){flash.addFlashAttribute("error",e.getMessage());}
+
+    @PostMapping("/products/{id}/update")
+    public String update(@PathVariable long id, @RequestParam String name, @RequestParam BigDecimal price,
+                         RedirectAttributes flash) {
+        try {
+            catalog.changeProduct(id, name, price);
+            flash.addFlashAttribute("success", "Producto actualizado");
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            LOG.warn("No se pudo actualizar el producto {}", id, e);
+            flash.addFlashAttribute("error", GENERIC_ERROR);
+        }
         return "redirect:/products";
     }
-    @PostMapping("/products/{id}/disable") public String disable(@PathVariable long id,RedirectAttributes flash){catalog.deactivate(id);flash.addFlashAttribute("success","Producto deshabilitado");return "redirect:/products";}
-    @PostMapping("/categories") public String category(@RequestParam String name,RedirectAttributes flash){try{catalog.addCategory(name);flash.addFlashAttribute("success","Categoría registrada");}catch(IllegalArgumentException | org.springframework.dao.DataIntegrityViolationException e){flash.addFlashAttribute("error",e.getMessage());}return "redirect:/products";}
+
+    @PostMapping("/products/{id}/disable")
+    public String disable(@PathVariable long id, RedirectAttributes flash) {
+        try {
+            catalog.deactivate(id);
+            flash.addFlashAttribute("success", "Producto deshabilitado");
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            LOG.warn("No se pudo deshabilitar el producto {}", id, e);
+            flash.addFlashAttribute("error", GENERIC_ERROR);
+        }
+        return "redirect:/products";
+    }
+
+    @PostMapping("/categories")
+    public String category(@RequestParam String name, RedirectAttributes flash) {
+        try {
+            catalog.addCategory(name);
+            flash.addFlashAttribute("success", "Categoría registrada");
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            LOG.warn("No se pudo registrar la categoría", e);
+            flash.addFlashAttribute("error", GENERIC_ERROR);
+        }
+        return "redirect:/products";
+    }
 }
