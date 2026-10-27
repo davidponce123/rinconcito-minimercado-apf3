@@ -16,7 +16,7 @@ public class AccountService {
     public AccountService(JdbcTemplate jdbc,PasswordEncoder encoder){this.jdbc=jdbc;this.encoder=encoder;}
     @Transactional
     public long create(String username,String password,String role){
-        if(StringUtils.isBlank(username)||username.trim().length()>40||password==null||password.length()<12||!Set.of("ADMIN","CAJERO").contains(role))
+        if(StringUtils.isBlank(username)||username.trim().length()>40||StringUtils.isBlank(password)||password.length()<12||!Set.of("ADMIN","CAJERO").contains(role))
             throw new IllegalArgumentException("Nombre, clave de 12 caracteres y rol son obligatorios");
         Long roleId=jdbc.queryForObject("SELECT id_rol FROM rol WHERE nombre=?",Long.class,role);
         Long id=jdbc.queryForObject("INSERT INTO usuario(nombre_usuario,password_hash,id_rol) VALUES (?,?,?) RETURNING id_usuario",Long.class,username.trim(),encoder.encode(password),roleId);
