@@ -100,6 +100,42 @@ class InventoryMovementsIntegrationTest {
         return jdbc.queryForObject("SELECT COUNT(*) FROM "+table,Integer.class);
     }
 
+    @Test void subcentCostCannotBeRoundedIntoARecordedLot(){
+        var valid=lot(1,4,null);
+        var subcent=new ReceiptLine(1,6,new BigDecimal("1.005"),null);
+        assertThrows(IllegalArgumentException.class,
+                ()->receiving.register(1,"G-SUBCENT",List.of(valid,subcent),"admin"));
+        assertEquals(0,count("ingreso_mercaderia"));
+        assertEquals(0,count("detalle_ingreso"));
+        assertEquals(0,count("movimiento_inventario"));
+        assertEquals(0,inventory.available(1));
+    }
+
+    @Test void oversizedCostIsRejectedAsAValidationError(){
+        var oversized=new ReceiptLine(1,3,new BigDecimal("100000000"),null);
+        assertThrows(IllegalArgumentException.class,
+                ()->receiving.register(1,"G-RANGE",List.of(oversized),"admin"));
+        assertEquals(0,count("ingreso_mercaderia"));
+        assertEquals(0,count("detalle_ingreso"));
+        assertEquals(0,count("movimiento_inventario"));
+        assertEquals(0,inventory.available(1));
+    }
+
+    @Test void exactCostsAndOptionalExpirationsSurviveConsolidation(){
+        var dated=new ReceiptLine(1,4,new BigDecimal("3.4000"),LocalDate.now().plusMonths(2));
+        var undated=new ReceiptLine(1,6,new BigDecimal("1E+1"),null);
+        long id=receiving.register(1,"G-EXACT",List.of(dated,undated),"admin");
+        assertEquals(List.of(new BigDecimal("3.40"),new BigDecimal("10.00")),jdbc.query(
+                "SELECT costo FROM detalle_ingreso WHERE id_ingreso=? ORDER BY id_detalle_ingreso",
+                (rs,n)->rs.getBigDecimal(1),id));
+        assertNull(jdbc.queryForObject(
+                "SELECT fecha_vencimiento FROM detalle_ingreso WHERE id_ingreso=? ORDER BY id_detalle_ingreso DESC LIMIT 1",
+                java.sql.Date.class,id));
+        assertEquals(2,count("detalle_ingreso"));
+        assertEquals(1,count("movimiento_inventario"));
+        assertEquals(10,inventory.available(1));
+    }
+
     @Test void preservesLotsAndConsolidatesEntryThenSaleLeavesSeven(){
         var date=LocalDate.now().plusMonths(3);
         long receipt=receiving.register(1," G-01 ",List.of(lot(1,4,date),lot(1,6,date.plusMonths(2))),"admin");
