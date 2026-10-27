@@ -19,5 +19,10 @@ if ([int]$matches[1] -lt 25) { Write-Error "Este proyecto requiere JDK 25 o post
 if (-not (Get-Command mvn -ErrorAction SilentlyContinue)) { Write-Error "Instala Maven y configura PATH"; exit 1 }
 if ($env:DB_PASSWORD -like "ESCRIBE_AQUI*") { Write-Error "Cambia DB_PASSWORD en .env"; exit 1 }
 if ($env:ADMIN_PASSWORD -like "CREA_UNA*") { Write-Error "Cambia ADMIN_PASSWORD en .env"; exit 1 }
+
+# Verificar PostgreSQL antes de iniciar Spring Boot
+& (Join-Path $PSScriptRoot "verificar-postgresql.ps1")
+
 Write-Host "Iniciando Rinconcito en http://localhost:8080/login" -ForegroundColor Cyan
 mvn spring-boot:run
+
