@@ -28,7 +28,18 @@ public class JdbcProductDao implements ProductDao {
     @Override public void update(long id,String name,BigDecimal price) {
         if(jdbc.update("UPDATE producto SET nombre=?,precio=? WHERE id_producto=? AND estado=true",name,price,id)!=1) throw new IllegalArgumentException("Producto no encontrado");
     }
-    @Override public void deactivate(long id) {jdbc.update("UPDATE producto SET estado=false WHERE id_producto=?",id);}
+    @Override public void deactivate(long id) {
+        if(jdbc.update("UPDATE producto SET estado=false WHERE id_producto=?",id)!=1) throw new IllegalArgumentException("Producto no encontrado");
+    }
     @Override public void createCategory(String name) {jdbc.update("INSERT INTO categoria(nombre) VALUES (?)",name);}
     @Override public List<Category> categories(){return jdbc.query("SELECT id_categoria,nombre FROM categoria ORDER BY nombre",(rs,n)->new Category(rs.getLong(1),rs.getString(2)));}
+    @Override public boolean categoryExists(long categoryId){
+        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM categoria WHERE id_categoria=?)",Boolean.class,categoryId));
+    }
+    @Override public boolean categoryNameExists(String name){
+        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM categoria WHERE lower(nombre)=lower(?))",Boolean.class,name));
+    }
+    @Override public boolean activeProductNameExists(String name,long excludeId){
+        return Boolean.TRUE.equals(jdbc.queryForObject("SELECT EXISTS(SELECT 1 FROM producto WHERE lower(nombre)=lower(?) AND estado=true AND id_producto<>?)",Boolean.class,name,excludeId));
+    }
 }

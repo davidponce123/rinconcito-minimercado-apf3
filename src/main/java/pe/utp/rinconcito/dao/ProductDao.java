@@ -13,5 +13,18 @@ public interface ProductDao {
     void deactivate(long id);
     void createCategory(String name);
     List<Category> categories();
+
+    /** @return true si existe una categoría con ese id. */
+    boolean categoryExists(long categoryId);
+
+    /** @return true si ya hay una categoría con ese nombre (sin distinguir mayúsculas). */
+    boolean categoryNameExists(String name);
+
+    /**
+     * @param excludeId id del producto que se está editando (0 si es un alta nueva)
+     * @return true si otro producto ACTIVO ya usa ese nombre (sin distinguir mayúsculas).
+     */
+    boolean activeProductNameExists(String name, long excludeId);
+
     record Category(long id, String name) {}
 }
