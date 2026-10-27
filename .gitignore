@@ -1,0 +1,36 @@
+# Credenciales locales; solo se comparte la plantilla.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials.json
+
+# Compilados y dependencias generadas.
+target/
+build/
+node_modules/
+*.class
+*.jar
+*.war
+
+# Registros, temporales y preferencias personales.
+logs/
+*.log
+*.tmp
+*.bak
+~$*
+__pycache__/
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/*.local.json
+
+.classpath
+.project
+.settings/

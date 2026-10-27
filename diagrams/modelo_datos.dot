@@ -1,0 +1,23 @@
+digraph ER {
+ graph [layout=dot, rankdir=LR, bgcolor="white", pad=".4", nodesep=".26", ranksep=".54", fontname="DejaVu Sans",label="Modelo lógico de 15 tablas · Rinconcito",labelloc=t,fontsize=20,fontcolor="#18582d",splines=polyline];
+ node [shape=record,style="rounded,filled",fillcolor="#f4faf6",color="#6d9d7e",fontname="DejaVu Sans",fontsize=10,margin=".15,.12"];
+ edge [color="#9cafa1",arrowsize=.55,penwidth=1.0];
+ rol[label="{rol|id_rol PK|nombre UQ}"];
+ usuario[label="{usuario|id_usuario PK|id_rol FK|password_hash}"];
+ administrador[label="{administrador|id_usuario PK/FK}"];
+ cajero[label="{cajero|id_usuario PK/FK}"];
+ categoria[label="{categoria|id_categoria PK}"];
+ producto[label="{producto|id_producto PK|id_categoria FK|precio|estado}"];
+ inventario[label="{inventario|id_inventario PK|id_producto UQ/FK|stock_minimo}"];
+ proveedor[label="{proveedor|id_proveedor PK}"];
+ venta[label="{venta|id_venta PK|id_usuario FK|fecha_pago}"];
+ detalle_venta[label="{detalle_venta|id_detalle_venta PK|id_venta FK|id_producto FK}"];
+ ingreso[label="{ingreso_mercaderia|id_ingreso PK|id_proveedor FK|id_usuario FK|guia UQ con proveedor}"];
+ detalle_ingreso[label="{detalle_ingreso|id_detalle_ingreso PK|id_ingreso FK|id_producto FK|fecha_vencimiento}"];
+ movimiento[label="{movimiento_inventario|id_movimiento PK|id_producto FK|id_venta / id_ingreso FK|tipo, cantidad}",fillcolor="#e7f3fb",color="#689ac4"];
+ auditoria[label="{auditoria_cambio|id_auditoria PK|id_usuario FK|tabla_afectada|accion}",fillcolor="#fff4df",color="#c69253"];
+ baja[label="{accion_baja_rotacion|id_accion PK|id_producto FK|id_usuario FK}"];
+ rol->usuario;usuario->auditoria;usuario->administrador;usuario->cajero;usuario->venta;usuario->ingreso;
+ categoria->producto;producto->inventario;producto->detalle_venta;producto->detalle_ingreso;producto->movimiento;producto->baja;
+ proveedor->ingreso;venta->detalle_venta;ingreso->detalle_ingreso;venta->movimiento;ingreso->movimiento;
+}

@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "APF3: probar con Maven",
+      "type": "shell",
+      "command": "mvn clean test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "APF3: iniciar (PowerShell)",
+      "type": "shell",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}/scripts/iniciar.ps1\"",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

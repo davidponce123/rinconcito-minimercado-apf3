@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Rinconcito - Iniciar Spring Boot",
+      "request": "launch",
+      "mainClass": "pe.utp.rinconcito.RinconcitoApplication",
+      "projectName": "rinconcito-apf3",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    }
+  ]
+}
