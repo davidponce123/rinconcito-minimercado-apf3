@@ -10,6 +10,7 @@ import pe.utp.rinconcito.dao.InventoryDao;
 import pe.utp.rinconcito.dao.OperationDao;
 import pe.utp.rinconcito.dao.ProductDao;
 import pe.utp.rinconcito.domain.ReceiptLine;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import java.util.TreeMap;
 @Service
 public class ReceivingService {
     private static final Logger log=LoggerFactory.getLogger(ReceivingService.class);
+    // detalle_ingreso.costo is NUMERIC(10,2): never silently round a received lot's historical cost.
+    private static final BigDecimal MAX_COST=new BigDecimal("99999999.99");
     private final ProductDao products;
     private final InventoryDao inventory;
     private final OperationDao operations;
@@ -35,6 +38,8 @@ public class ReceivingService {
             Preconditions.checkArgument(line!=null,"Lote incompleto");
             Preconditions.checkArgument(line.productId()>0 && line.quantity()>0,"Producto y cantidad inválidos");
             Preconditions.checkArgument(line.cost()!=null && line.cost().signum()>=0,"Costo inválido");
+            Preconditions.checkArgument(line.cost().compareTo(MAX_COST)<=0 && line.cost().stripTrailingZeros().scale()<=2,
+                    "El costo debe estar entre 0 y 99999999.99 y tener como máximo dos decimales");
             Preconditions.checkArgument(line.expiration()==null || !line.expiration().isBefore(receivedOn),"Lote vencido; registrar incidencia por separado");
             totals.merge(line.productId(),line.quantity(),Math::addExact);
         }

@@ -101,6 +101,7 @@ class ReceiptControllerTest {
     @Test void administratorCanRenderReceiptForm() throws Exception {
         mvc.perform(get("/receipts/new").with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk()).andExpect(view().name("receipt-form"))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Lotes y cantidades")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Lotes y cantidades")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("max=\"99999999.99\"")));
     }
 }
