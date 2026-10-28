@@ -17,16 +17,7 @@
         </div>
     </header>
     <div class="layout">
-        <aside>
-            <div class="aside-label">OPERACIONES</div>
-            <nav><a th:href="@{/dashboard}">◫ Panel de inicio</a><a th:href="@{/sales}">▣ Ventas</a><a
-                    th:href="@{/inventory}">◈ Inventario</a><a th:if="${isAdmin}" th:href="@{/products}">▤
-                    Productos</a><a th:if="${isAdmin}" th:href="@{/users}">♙ Usuarios</a><a th:if="${isAdmin}"
-                    th:href="@{/suppliers}">▧ Proveedores</a><a th:if="${isAdmin}" th:href="@{/slow-moving}">↘ Baja
-                    rotación</a><a th:if="${isAdmin}" th:href="@{/receipts}">◧ Recepciones</a><a th:if="${isAdmin}"
-                    th:href="@{/reports}">Ver reportes</a></nav>
-            <div class="sidebar-foot">Proyecto Integrador I<br>Avance Final 3</div>
-        </aside>
+        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
         <main>
             <div class="eyebrow">SISTEMA / INVENTARIO</div>
             <div class="heading">
