@@ -25,7 +25,7 @@ public class SecurityConfig {
     @Bean public SecurityFilterChain webSecurity(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests(a->a
                   .requestMatchers("/css/**","/js/**","/login","/error").permitAll()
-                  .requestMatchers("/products/**","/categories/**","/receipts/**","/reports/**","/users/**","/suppliers/**","/slow-moving/**").hasRole("ADMIN")
+                  .requestMatchers("/products/**","/categories/**","/receipts/**","/reports","/reports/**","/users/**","/suppliers/**","/slow-moving/**").hasRole("ADMIN")
                   .requestMatchers("/sales/**","/inventory/**","/dashboard").hasAnyRole("ADMIN","CAJERO")
                   .anyRequest().authenticated())
                 .formLogin(f->f.loginPage("/login").defaultSuccessUrl("/dashboard",true).permitAll())

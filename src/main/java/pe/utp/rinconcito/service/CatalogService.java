@@ -59,6 +59,13 @@ public class CatalogService {
         products.deactivate(id);
     }
 
+    /** Reactiva un producto existente conservando ventas y movimientos histÃ³ricos. */
+    @Transactional
+    public void reactivate(long id) {
+        Preconditions.checkArgument(id > 0, "Producto invÃ¡lido");
+        products.reactivate(id);
+    }
+
     @Transactional
     public void addCategory(String name) {
         String cleanName = StringUtils.normalizeSpace(name);

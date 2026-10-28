@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reportes y vista previa | Rinconcito</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <style>
+    .report-tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+    .report-filter{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+    .report-filter label{min-width:160px}
+    .report-summary{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+    .report-summary span{background:#e8f3eb;border-radius:9px;padding:12px 16px}
+    .report-pagination{display:flex;gap:12px;align-items:center;justify-content:flex-end;margin-top:18px}
+    .report-table{overflow-x:auto}
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" th:href="@{/dashboard}"><span class="brand-symbol">R</span>Rinconcito <small>MINIMERCADO</small></a>
+  <div class="user"><span th:text="${#authentication.name}">Usuario</span>
+    <form method="post" th:action="@{/logout}"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button class="logout">Salir</button></form>
+  </div>
+</header>
+<div class="layout">
+  <aside>
+    <div class="aside-label">OPERACIONES</div>
+    <nav>
+      <a th:href="@{/dashboard}">◫ Panel de inicio</a>
+      <a th:href="@{/sales}">▣ Ventas</a>
+      <a th:href="@{/inventory}">◈ Inventario</a>
+      <a th:href="@{/products}">▤ Productos</a>
+      <a th:href="@{/receipts}">◧ Recepciones</a>
+      <a th:href="@{/suppliers}">▧ Proveedores</a>
+      <a th:href="@{/slow-moving}">↘ Baja rotación</a>
+      <a th:href="@{/reports}">▤ Reportes y vista previa</a>
+    </nav>
+    <div class="sidebar-foot">Rinconcito Minimercado · Reportes</div>
+  </aside>
+  <main>
+    <div class="eyebrow">SISTEMA / ANÁLISIS Y REPORTES</div>
+    <div class="heading"><div><h1>Centro de reportes</h1>
+      <p>Revisa los datos en pantalla antes de exportarlos a Excel.</p></div></div>
+    <div class="report-tabs">
+      <a class="btn" th:classappend="${type == 'inventory'} ? ' primary' : ''" th:href="@{/reports(type='inventory')}">Inventario</a>
+      <a class="btn" th:classappend="${type == 'sales'} ? ' primary' : ''" th:href="@{/reports(type='sales')}">Ventas</a>
+      <a class="btn" th:classappend="${type == 'slow'} ? ' primary' : ''" th:href="@{/reports(type='slow')}">Baja rotación</a>
+    </div>
+    <section class="panel">
+      <form class="report-filter" method="get" th:action="@{/reports}" th:if="${type == 'sales'}">
+        <input type="hidden" name="type" value="sales">
+        <label>Desde<input type="date" name="from" th:value="${from}"></label>
+        <label>Hasta<input type="date" name="to" th:value="${to}"></label>
+        <button class="btn">Aplicar fechas</button>
+      </form>
+      <div class="alert error" th:if="${error}" th:text="${error}"></div>
+      <div class="report-summary">
+        <span><b th:text="${totalRows}">0</b> registros encontrados</span>
+        <span th:if="${type == 'sales'}">Importe total: S/ <b th:text="${totalAmount}">0.00</b></span>
+        <span th:if="${type == 'inventory'}">Saldo calculado desde entradas y salidas</span>
+        <span th:if="${type == 'slow'}">Más de 30 días sin salidas y con existencias</span>
+      </div>
+      <div class="actions" th:unless="${error}">
+        <a class="btn primary" th:if="${type == 'inventory'}" th:href="@{/reports/inventory.xlsx}">⇩ Descargar inventario Excel</a>
+        <a class="btn primary" th:if="${type == 'sales'}" th:href="@{/reports/sales.xlsx(from=${from},to=${to})}">⇩ Descargar ventas Excel</a>
+        <a class="btn primary" th:if="${type == 'slow'}" th:href="@{/reports/slow-moving.xlsx}">⇩ Descargar baja rotación Excel</a>
+      </div>
+      <div class="report-table">
+        <table th:if="${type == 'inventory'}">
+          <thead><tr><th>ID</th><th>Producto</th><th>Stock</th><th>Stock mínimo</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr th:each="r:${items}">
+              <td th:text="${r['id_producto']}"></td><td th:text="${r['nombre']}"></td>
+              <td th:text="${r['stock_actual']}"></td><td th:text="${r['stock_minimo']}"></td>
+              <td><span class="chip" th:classappend="${r['stock_actual'] le r['stock_minimo']} ? ' warning' : ' good'"
+                 th:text="${r['stock_actual'] le r['stock_minimo']} ? 'Reponer' : 'Correcto'"></span></td>
+            </tr>
+          </tbody>
+        </table>
+        <table th:if="${type == 'sales'}">
+          <thead><tr><th>ID venta</th><th>Fecha de pago</th><th>Forma de pago</th><th>Total S/</th></tr></thead>
+          <tbody><tr th:each="r:${items}"><td th:text="${r['id_venta']}"></td><td th:text="${r['fecha_pago']}"></td><td th:text="${r['tipo_pago']}"></td><td th:text="${r['total']}"></td></tr></tbody>
+        </table>
+        <table th:if="${type == 'slow'}">
+          <thead><tr><th>ID</th><th>Producto</th><th>Stock</th><th>Días sin salida</th><th>Valor estimado S/</th></tr></thead>
+          <tbody><tr th:each="r:${items}"><td th:text="${r['id_producto']}"></td><td th:text="${r['nombre']}"></td><td th:text="${r['stock_actual']}"></td><td th:text="${r['dias']}"></td><td th:text="${r['valor_estimado']}"></td></tr></tbody>
+        </table>
+        <p class="muted" th:if="${#lists.isEmpty(items)}">No existen registros para este reporte y filtros.</p>
+      </div>
+      <nav class="report-pagination" aria-label="Paginación del reporte" th:if="${pages > 1}">
+        <a class="btn mini" th:if="${page > 0}" th:href="@{/reports(type=${type},from=${from},to=${to},page=${page - 1})}">← Anterior</a>
+        <strong th:text="|Página ${page + 1} de ${pages}|">Página 1 de 1</strong>
+        <a class="btn mini" th:if="${page + 1 lt pages}" th:href="@{/reports(type=${type},from=${from},to=${to},page=${page + 1})}">Siguiente →</a>
+      </nav>
+    </section>
+    <p class="hint">La vista previa muestra 25 filas por página; el archivo Excel incluye todos los registros del reporte. Los datos son obtenidos de PostgreSQL.</p>
+    <footer>Rinconcito Minimercado · Reportes de consulta con permisos de administrador</footer>
+  </main>
+</div>
+</body>
+</html>
