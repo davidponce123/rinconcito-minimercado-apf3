@@ -25,9 +25,18 @@ public class CatalogController {
     }
 
     @GetMapping("/products")
-    public String list(Model m) {
-        m.addAttribute("items", products.all());
+    public String list(@RequestParam(defaultValue="") String q,
+                       @RequestParam(defaultValue="0") int page, Model m) {
+        String search = q.trim().length() > 80 ? q.trim().substring(0,80) : q.trim();
+        long count = products.countMatching(search);
+        int last = (int)Math.min(Integer.MAX_VALUE/25,Math.max(0,(count-1)/25));
+        int current = Math.max(0, Math.min(page,last));
+        m.addAttribute("items", products.page(search,25,current*25));
         m.addAttribute("categories", products.categories());
+        m.addAttribute("q",search);
+        m.addAttribute("page",current);
+        m.addAttribute("pages",Math.max(1L,(count+24)/25));
+        m.addAttribute("total",count);
         return "products";
     }
 
@@ -70,6 +79,20 @@ public class CatalogController {
             flash.addFlashAttribute("error", e.getMessage());
         } catch (DataAccessException e) {
             LOG.warn("No se pudo deshabilitar el producto {}", id, e);
+            flash.addFlashAttribute("error", GENERIC_ERROR);
+        }
+        return "redirect:/products";
+    }
+
+    @PostMapping("/products/{id}/enable")
+    public String enable(@PathVariable long id, RedirectAttributes flash) {
+        try {
+            catalog.reactivate(id);
+            flash.addFlashAttribute("success", "Producto reactivado");
+        } catch (IllegalArgumentException e) {
+            flash.addFlashAttribute("error", e.getMessage());
+        } catch (DataAccessException e) {
+            LOG.warn("No se pudo reactivar el producto {}", id, e);
             flash.addFlashAttribute("error", GENERIC_ERROR);
         }
         return "redirect:/products";

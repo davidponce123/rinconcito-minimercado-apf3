@@ -7,10 +7,13 @@ import java.util.List;
 /** Contrato de persistencia del catálogo (DAO). */
 public interface ProductDao {
     List<Product> all();
+    List<Product> page(String search, int limit, int offset);
+    long countMatching(String search);
     Product activeById(long id);
     long create(String name, BigDecimal price, long categoryId);
     void update(long id, String name, BigDecimal price);
     void deactivate(long id);
+    void reactivate(long id);
     void createCategory(String name);
     List<Category> categories();
 
