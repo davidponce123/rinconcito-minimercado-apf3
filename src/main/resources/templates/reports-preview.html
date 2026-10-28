@@ -23,23 +23,7 @@
   </div>
 </header>
 <div class="layout">
-  <aside>
-    <div class="aside-label">OPERACIONES</div>
-
-<nav>
-    <a th:href="@{/dashboard}">◫ Panel de inicio</a>
-    <a th:href="@{/sales}">▣ Ventas</a>
-    <a th:href="@{/inventory}">◈ Inventario</a>
-    <a th:href="@{/products}">▤ Productos</a>
-    <a th:href="@{/users}">♙ Usuarios</a>
-    <a th:href="@{/suppliers}">▧ Proveedores</a>
-    <a th:href="@{/slow-moving}">↘ Baja rotación</a>
-    <a th:href="@{/receipts}">◧ Recepciones</a>
-    <a th:href="@{/reports}">▤ Reportes</a>
-</nav>
-
-    <div class="sidebar-foot">Rinconcito Minimercado · Reportes</div>
-  </aside>
+  <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
   <main>
     <div class="eyebrow">SISTEMA / ANÁLISIS Y REPORTES</div>
     <div class="heading"><div><h1>Centro de reportes</h1>

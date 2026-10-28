@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- Barra lateral unica: se reutiliza en todas las paginas con th:replace. -->
+<aside th:fragment="sidebar">
+    <div class="aside-label">OPERACIONES</div>
+    <nav aria-label="Navegacion principal">
+        <a th:href="@{/dashboard}">◫ Panel de inicio</a>
+        <a th:href="@{/sales}">▣ Ventas</a>
+        <a th:href="@{/inventory}">◈ Inventario</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/products}">▤ Productos</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/users}">♙ Usuarios</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/suppliers}">▧ Proveedores</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/slow-moving}">↘ Baja rotación</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/receipts}">◧ Recepciones</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/reports}">▤ Reportes</a>
+    </nav>
+    <div class="sidebar-foot">Proyecto Integrador I<br>Avance Final 3</div>
+</aside>
+</body>
+</html>
